@@ -1,0 +1,74 @@
+import tkinter as tk
+import random
+import felhantering_memory as fel
+
+
+ordlista = []
+
+räkning = 0
+matris_dim = 0
+svaruppslag = {}
+
+
+print("Endast positiva jämna heltal")
+
+def läs_fil():
+    """läser in fil och skapar en svarslista med längd som motsvarar antalent rutor
+    och gör att varje ord uppkommer två gånger med slumpmässig position"""
+    rutor_index = int((matris_dim ** 2)/2)
+    global svarlista, svaruppslag
+    try:
+        while True:
+                fil = input("vilken fil vill du läsa in: ")
+                with open(fil, "r", encoding="utf-8") as fil:
+                    ord = fil.readline()
+                    while ord != "":
+                        ordlista.append(ord)
+                        ord = fil.readline()
+
+                random.shuffle(ordlista)                #slumpar orden i ordlista så olika ord används
+                svarlista = ordlista[0:rutor_index]     #skapar ny lista med endast orden som kommer användas
+                svarlista = svarlista + svarlista       #dubblerar listan så att varje ord uppkommer två gånger
+                random.shuffle(svarlista)
+                for tal in range(len(svarlista)):
+                    svaruppslag[tal] = svarlista[tal]
+                break
+    except ValueError:
+        print("en fil vid det namnet hittades inte, vänligen försök igen")
+
+
+
+
+class memory_GUI():
+    global matris_dim, svarlista, svaruppslag
+
+
+    def __init__(self):
+        self.fönster = tk.Tk()
+
+
+        for rad in range(matris_dim):
+            for kolumn in range(matris_dim):
+                self.ruta = tk.Button(self.fönster, text=" ", font=("times", 15), height=5, width=10,
+                                      command=self.avslöja())
+
+                self.ruta.grid(row=rad, column=kolumn)
+
+    def avslöja(self):
+        pass
+        #if self.ruta["text"] == ' ':
+            #self.ruta["text"] == svaruppslag[värde]
+        #if self.ruta["text"] != ' ':
+            #pass
+
+        self.fönster.mainloop()
+
+
+def huvudprogram():
+
+    global matris_dim
+    matris_dim = fel.Avgör_jämn()
+    läs_fil()
+    memory = memory_GUI()
+
+huvudprogram()
