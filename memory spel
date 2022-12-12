@@ -1,0 +1,122 @@
+import tkinter as tk
+import random
+import felhantering_memory as fel
+from tkinter import *
+
+
+ordlista = []
+antal_ord = 0
+räkning = 0
+matris_dim = 0
+svaruppslag = {}
+svarlista = []
+
+print("Endast positiva jämna heltal, endast 4x4 har highscorelista")
+
+
+def läs_fil():
+    """läser in fil och skapar en svarslista med längd som motsvarar antalent rutor
+    och gör att varje ord uppkommer två gånger med slumpmässig position"""
+    rutor_index = int((matris_dim ** 2)/2)
+    global svarlista, svaruppslag
+    try:
+        while True:
+            fil = "memo.txt"                              #input("vilken fil vill du läsa in: ")
+            with open(fil, "r", encoding="utf-8") as fil:
+                ord = fil.readline()
+                while ord != "":
+                    ordlista.append(ord)
+                    ord = fil.readline()
+
+            random.shuffle(ordlista)                #slumpar orden i ordlista så olika ord används
+            svarlista = ordlista[0:rutor_index]     #skapar ny lista med endast orden som kommer användas
+            svarlista = svarlista + svarlista       #dubblerar listan så att varje ord uppkommer två gånger
+            random.shuffle(svarlista)
+            for svar in range(len(svarlista)):
+                svaruppslag[svar] = svarlista[svar]
+
+            break
+    except:
+        print("en fil vid det namnet hittades inte, vänligen försök igen")
+
+
+class highscore_fönster:
+    def __init__(self):
+        self.highscore_lista = tk.Tk()
+        self.highscore_lista.title("Highscore lista")
+        self.highscore_lista.mainloop()
+
+
+class memory_GUI:
+    """skapar en klass som skapar ett fönster med rutor"""
+
+    global matris_dim, svarlista
+
+    def avslöja(self, svar):
+
+        if self.ruta["text"] == " ":
+            self.ruta["text"] = svar
+
+        if self.ruta["text"] != " ":
+            self.ruta["state"] = "disabled"
+
+
+
+    def öppna_highscore(self):
+        #self.highscore_lista = tk.Toplevel()
+        highscore_fönster()
+
+    def stäng_fönster(self):
+        self.fönster.destroy()
+
+    def omspel(self):
+        self.fönster.destroy()
+        svarlista.clear()
+        ordlista.clear()
+        läs_fil()
+        memory_GUI()
+
+    def __init__(self):
+        self.fönster = tk.Tk()                  #skapar fönstret för memory-spelet
+        self.fönster.title("memory spel")
+
+
+        rd = 0
+        klmn = 0
+        for svar in svarlista:        #skapar lika många rutor som antal svar
+            self.ruta = tk.Button(self.fönster, text=" ", font=("times", 15),
+                                  height=5, width=10, command=lambda: self.avslöja(svar))
+
+            self.ruta.grid(row=rd, column=klmn)
+
+            klmn += 1
+            if klmn == matris_dim:            #när väl A antal rutor uppnåts i en rad byts rad
+                klmn = 0                      #gör att kolumnerna vid radbyte startar vid 0
+                rd += 1
+
+        self.highscore_knapp = tk.Button(self.fönster, text="Highscore lista",
+                                         font=("times", 10), command=lambda: self.öppna_highscore())
+        self.highscore_knapp.grid(row=matris_dim, column=0)
+
+        self.avsluta = tk.Button(self.fönster, text="avsluta", font=("times", 10),
+                                 command=lambda: self.stäng_fönster())
+        self.avsluta.grid(row=matris_dim, column=1)
+
+        self.starta_om = tk.Button(self.fönster, text="starta om", font=("times", 10)
+                                 ,command=lambda: self.omspel())
+        self.starta_om.grid(row=matris_dim, column=2)
+
+        self.visa_försök = tk.Label(self.fönster, text=f"{räkning}", font=("times", 10))
+        self.visa_försök.grid(row=matris_dim, column=3)
+
+        self.fönster.mainloop()
+
+
+def huvudprogram():
+    global matris_dim
+    matris_dim = 4   #fel.Avgör_jämn()
+    läs_fil()
+
+    memory_GUI()
+
+huvudprogram()
